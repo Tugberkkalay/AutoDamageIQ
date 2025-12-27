@@ -2,6 +2,7 @@ import os
 import sys
 import uuid
 import base64
+import torch
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
@@ -20,9 +21,15 @@ from PIL import Image
 # Load environment variables
 load_dotenv()
 
+# Fix for PyTorch 2.6+ weights_only issue
+torch.serialization.add_safe_globals([])
+
 # Add src path for YOLO models
 SRC_PATH = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(SRC_PATH))
+
+# Set environment variable to allow unsafe loading for YOLO models
+os.environ['TORCH_FORCE_WEIGHTS_ONLY_LOAD'] = '0'
 
 from ultralytics import YOLO
 
