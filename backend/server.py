@@ -245,13 +245,13 @@ def analyze_image(image_np: np.ndarray) -> Dict[str, Any]:
         parts.append({
             "name": part_name,
             "name_tr": PARTS_TR.get(part_name, part_name),
-            "box": part_box.tolist()
+            "box": [float(x) for x in part_box.tolist()]
         })
     
     # Calculate summary
     total_damages = len(damages)
     affected_parts = len(set([d["part"] for d in damages if d["part"]]))
-    avg_severity = round(sum([d["severity"] for d in damages]) / max(1, total_damages), 1)
+    avg_severity = float(round(sum([d["severity"] for d in damages]) / max(1, total_damages), 1))
     
     risk_level = "Düşük"
     if avg_severity >= 4 or total_damages >= 4:
@@ -259,17 +259,20 @@ def analyze_image(image_np: np.ndarray) -> Dict[str, Any]:
     elif avg_severity >= 2.5 or total_damages >= 2:
         risk_level = "Orta"
     
-    return {
+    result = {
         "damages": damages,
         "parts": parts,
         "summary": {
-            "total_damages": total_damages,
-            "affected_parts": affected_parts,
-            "average_severity": avg_severity,
+            "total_damages": int(total_damages),
+            "affected_parts": int(affected_parts),
+            "average_severity": float(avg_severity),
             "risk_level": risk_level
         },
-        "image_size": {"width": w, "height": h}
+        "image_size": {"width": int(w), "height": int(h)}
     }
+    
+    # Convert all numpy types to native Python types
+    return convert_numpy_types(result)
 
 # Pydantic models
 class AnalysisResponse(BaseModel):
