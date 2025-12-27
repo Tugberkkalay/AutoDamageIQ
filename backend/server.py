@@ -219,7 +219,7 @@ def analyze_image(image_np: np.ndarray) -> Dict[str, Any]:
             if iou > best_iou:
                 best_iou = iou
                 best_part = part_names[int(part_cls[j])]
-                best_part_box = part_box.tolist()
+                best_part_box = [float(x) for x in part_box.tolist()]
         
         damage_type = dmg_names[int(dmg_cls[i])]
         confidence = float(dmg_conf[i])
@@ -228,13 +228,13 @@ def analyze_image(image_np: np.ndarray) -> Dict[str, Any]:
             "id": str(uuid.uuid4())[:8],
             "type": damage_type,
             "type_tr": DAMAGE_TR.get(damage_type, damage_type),
-            "confidence": round(confidence * 100, 1),
-            "severity": SEVERITY_MAP.get(damage_type, 3),
-            "box": dmg_box.tolist(),
+            "confidence": float(round(confidence * 100, 1)),
+            "severity": int(SEVERITY_MAP.get(damage_type, 3)),
+            "box": [float(x) for x in dmg_box.tolist()],
             "part": best_part if best_iou > 0.1 else None,
             "part_tr": PARTS_TR.get(best_part, best_part) if best_iou > 0.1 else None,
             "part_box": best_part_box if best_iou > 0.1 else None,
-            "iou_with_part": round(best_iou, 3)
+            "iou_with_part": float(round(best_iou, 3))
         }
         damages.append(damage_entry)
     
