@@ -141,22 +141,36 @@ SEVERITY_MAP = {
     "tire_flat": 4
 }
 
+def convert_numpy_types(obj):
+    """Convert numpy types to Python native types for JSON/MongoDB serialization"""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_numpy_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    return obj
+
 def box_iou(box_a, box_b):
     """Calculate IoU between two boxes [x1, y1, x2, y2]"""
-    x1 = max(box_a[0], box_b[0])
-    y1 = max(box_a[1], box_b[1])
-    x2 = min(box_a[2], box_b[2])
-    y2 = min(box_a[3], box_b[3])
+    x1 = max(float(box_a[0]), float(box_b[0]))
+    y1 = max(float(box_a[1]), float(box_b[1]))
+    x2 = min(float(box_a[2]), float(box_b[2]))
+    y2 = min(float(box_a[3]), float(box_b[3]))
     
     inter_w = max(0.0, x2 - x1)
     inter_h = max(0.0, y2 - y1)
     inter_area = inter_w * inter_h
     
-    area_a = max(0.0, (box_a[2] - box_a[0]) * (box_a[3] - box_a[1]))
-    area_b = max(0.0, (box_b[2] - box_b[0]) * (box_b[3] - box_b[1]))
+    area_a = max(0.0, (float(box_a[2]) - float(box_a[0])) * (float(box_a[3]) - float(box_a[1])))
+    area_b = max(0.0, (float(box_b[2]) - float(box_b[0])) * (float(box_b[3]) - float(box_b[1])))
     
     union = area_a + area_b - inter_area + 1e-6
-    return inter_area / union
+    return float(inter_area / union)
 
 def analyze_image(image_np: np.ndarray) -> Dict[str, Any]:
     """Run damage detection and parts segmentation on image"""
