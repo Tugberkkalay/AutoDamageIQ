@@ -312,6 +312,9 @@ async def analyze_vehicle(file: UploadFile = File(...)):
     # Analyze
     results = analyze_image(image_np)
     
+    # Ensure all numpy types are converted to native Python types
+    results = convert_to_native_types(results)
+    
     # Convert image to base64 for storage/display
     _, buffer = cv2.imencode('.jpg', image_np, [cv2.IMWRITE_JPEG_QUALITY, 85])
     image_base64 = base64.b64encode(buffer).decode('utf-8')
