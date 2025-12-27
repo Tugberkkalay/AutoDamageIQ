@@ -68,14 +68,30 @@ def get_damage_model():
     global damage_model
     if damage_model is None:
         print(f"Loading damage model from {DAMAGE_MODEL_PATH}")
+        # Use weights_only=False for YOLO custom models
+        import torch
+        original_load = torch.load
+        def patched_load(*args, **kwargs):
+            kwargs['weights_only'] = False
+            return original_load(*args, **kwargs)
+        torch.load = patched_load
         damage_model = YOLO(str(DAMAGE_MODEL_PATH))
+        torch.load = original_load
     return damage_model
 
 def get_parts_model():
     global parts_model
     if parts_model is None:
         print(f"Loading parts model from {PARTS_MODEL_PATH}")
+        # Use weights_only=False for YOLO custom models
+        import torch
+        original_load = torch.load
+        def patched_load(*args, **kwargs):
+            kwargs['weights_only'] = False
+            return original_load(*args, **kwargs)
+        torch.load = patched_load
         parts_model = YOLO(str(PARTS_MODEL_PATH))
+        torch.load = original_load
     return parts_model
 
 # Damage type translations
