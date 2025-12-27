@@ -155,6 +155,25 @@ def convert_numpy_types(obj):
         return [convert_numpy_types(item) for item in obj]
     return obj
 
+def convert_to_native_types(obj):
+    """Recursively convert all numpy types to native Python types"""
+    import json
+    
+    def default_converter(o):
+        if isinstance(o, (np.integer, np.int64, np.int32)):
+            return int(o)
+        elif isinstance(o, (np.floating, np.float64, np.float32)):
+            return float(o)
+        elif isinstance(o, np.ndarray):
+            return o.tolist()
+        elif isinstance(o, np.bool_):
+            return bool(o)
+        raise TypeError(f"Object of type {type(o)} is not JSON serializable")
+    
+    # Convert to JSON string and back to ensure all numpy types are converted
+    json_str = json.dumps(obj, default=default_converter)
+    return json.loads(json_str)
+
 def box_iou(box_a, box_b):
     """Calculate IoU between two boxes [x1, y1, x2, y2]"""
     x1 = max(float(box_a[0]), float(box_b[0]))
